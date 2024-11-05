@@ -3,7 +3,6 @@ package org.example.demofunkos.funkos.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.example.demofunkos.categoria.models.Categoria;
-import org.example.demofunkos.categoria.models.TipoCategoria;
 import org.example.demofunkos.funkos.dto.FunkoDto;
 import org.example.demofunkos.funkos.mappers.FunkoMapper;
 import org.example.demofunkos.funkos.models.Funko;
@@ -56,7 +55,7 @@ class FunkoControllerTest {
     @BeforeEach
     void setUp() {
         categoriaTest.setId(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
-        categoriaTest.setNombre(TipoCategoria.PELICULA);
+        categoriaTest.setNombre("PELICULA");
         categoriaTest.setActivado(true);
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -114,13 +113,13 @@ class FunkoControllerTest {
     void save() throws Exception {
         Categoria nuevaCategoria = new Categoria();
         nuevaCategoria.setId(UUID.fromString("5790bdd4-8898-4c61-b547-bc26952dc2a3"));
-        nuevaCategoria.setNombre(TipoCategoria.DISNEY);
+        nuevaCategoria.setNombre("DISNEY");
         nuevaCategoria.setActivado(true);
 
         FunkoDto nuevoFunko = new FunkoDto();
         nuevoFunko.setNombre("Mickey Mouse");
         nuevoFunko.setPrecio(7.95);
-        nuevoFunko.setCategoria(TipoCategoria.DISNEY);
+        nuevoFunko.setCategoria("DISNEY");
 
         when(service.save(nuevoFunko)).thenReturn(mapper.toFunko(nuevoFunko, nuevaCategoria));
 
@@ -147,7 +146,7 @@ class FunkoControllerTest {
     void update() throws Exception {
         Categoria updatedCategoria = new Categoria();
         updatedCategoria.setId(UUID.fromString("5790bdd4-8898-4c61-b547-bc26952dc2a3"));
-        updatedCategoria.setNombre(TipoCategoria.SUPERHEROES);
+        updatedCategoria.setNombre("SUPERHEROE");
         updatedCategoria.setActivado(true);
 
         FunkoDto updateFunko = new FunkoDto();
@@ -174,7 +173,7 @@ class FunkoControllerTest {
                 () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
                 () -> assertEquals(res.getNombre(), updateFunko.getNombre()),
                 () -> assertEquals(res.getPrecio(), updateFunko.getPrecio()),
-                () -> assertEquals(res.getCategoria(), updateFunko.getCategoria())
+                () -> assertEquals(res.getCategoria().getNombre(), updateFunko.getCategoria())
         );
 
         verify(service, times(1)).update(2L, updateFunko);
@@ -189,7 +188,7 @@ class FunkoControllerTest {
                        .accept(MediaType.APPLICATION_JSON))
                .andReturn().getResponse();
 
-        assertEquals(response.getStatus(), HttpStatus.NO_CONTENT.value());
+        assertEquals(response.getStatus(), HttpStatus.OK.value());
 
         verify(service, times(1)).delete(1L);
     }

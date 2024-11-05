@@ -1,7 +1,6 @@
 package org.example.demofunkos.funkos.services;
 
 import org.example.demofunkos.categoria.models.Categoria;
-import org.example.demofunkos.categoria.models.TipoCategoria;
 import org.example.demofunkos.categoria.services.CategoriaService;
 import org.example.demofunkos.funkos.dto.FunkoDto;
 import org.example.demofunkos.funkos.mappers.FunkoMapper;
@@ -42,7 +41,7 @@ class FunkoServiceImplTest {
     void setUp() {
         categoriaTest = new Categoria();
         categoriaTest.setId(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
-        categoriaTest.setNombre(TipoCategoria.PELICULA);
+        categoriaTest.setNombre("PELICULA");
         categoriaTest.setActivado(true);
 
         funkoTest = new Funko();
@@ -88,7 +87,7 @@ class FunkoServiceImplTest {
     void save() {
         Categoria nuevaCategoria = new Categoria();
         nuevaCategoria.setId(UUID.fromString("5790bdd4-8898-4c61-b547-bc26952dc2a3"));
-        nuevaCategoria.setNombre(TipoCategoria.DISNEY);
+        nuevaCategoria.setNombre("DISNEY");
         nuevaCategoria.setActivado(true);
 
         FunkoDto nuevoFunko = new FunkoDto();
@@ -103,7 +102,7 @@ class FunkoServiceImplTest {
 
         when(mapper.toFunko(nuevoFunko, nuevaCategoria)).thenReturn(funkoMapped);
         when(repository.save(funkoMapped)).thenReturn(funkoMapped);
-        when(categoriaService.getByNombre(TipoCategoria.DISNEY)).thenReturn(nuevaCategoria);
+        when(categoriaService.getByNombre("DISNEY")).thenReturn(nuevaCategoria);
 
         var result = service.save(nuevoFunko);
 
@@ -123,20 +122,26 @@ class FunkoServiceImplTest {
     void update() {
         Categoria updatedCategoria = new Categoria();
         updatedCategoria.setId(UUID.fromString("5790bdd4-8898-4c61-b547-bc26952dc2a3"));
-        updatedCategoria.setNombre(TipoCategoria.SUPERHEROES);
+        updatedCategoria.setNombre("SUPERHEROES");
         updatedCategoria.setActivado(true);
-
+    
+        FunkoDto updatedFunkoDto = new FunkoDto();
+        updatedFunkoDto.setNombre("Superman");
+        updatedFunkoDto.setPrecio(15.99);
+        updatedFunkoDto.setCategoria(updatedCategoria.getNombre());
+    
         Funko updatedFunko = new Funko();
         updatedFunko.setId(2L);
         updatedFunko.setNombre("Superman");
         updatedFunko.setPrecio(15.99);
         updatedFunko.setCategoria(updatedCategoria);
-
+    
         when(repository.findById(2L)).thenReturn(Optional.of(updatedFunko));
         when(repository.save(updatedFunko)).thenReturn(updatedFunko);
-
-        var result = service.update(2L, updatedFunko);
-
+        when(categoriaService.getByNombre("SUPERHEROES")).thenReturn(updatedCategoria);
+    
+        var result = service.update(2L, updatedFunkoDto);
+    
         assertAll(
             () -> assertNotNull(result),
             () -> assertEquals(2L, result.getId()),
@@ -144,9 +149,10 @@ class FunkoServiceImplTest {
             () -> assertEquals(15.99, result.getPrecio()),
             () -> assertEquals(updatedCategoria, result.getCategoria())
         );
-
+    
         verify(repository, times(1)).findById(2L);
         verify(repository, times(1)).save(updatedFunko);
+        verify(categoriaService, times(1)).getByNombre(updatedCategoria.getNombre());
     }
 
     @Test
@@ -162,6 +168,6 @@ class FunkoServiceImplTest {
         );
 
         verify(repository, times(1)).findById(1L);
-        verify(repository, times(1)).deleteFunkoById(1L);
+        verify(repository, times(1)).deleteById(1L);
     }
 }

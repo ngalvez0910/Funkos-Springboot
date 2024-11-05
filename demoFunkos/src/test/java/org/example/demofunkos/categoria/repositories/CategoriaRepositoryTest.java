@@ -1,7 +1,6 @@
 package org.example.demofunkos.categoria.repositories;
 
 import org.example.demofunkos.categoria.models.Categoria;
-import org.example.demofunkos.categoria.models.TipoCategoria;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ class CategoriaRepositoryTest {
     void setUp() {
         categoriaTest = new Categoria();
         categoriaTest.setId(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
-        categoriaTest.setNombre(TipoCategoria.DISNEY);
+        categoriaTest.setNombre("DISNEY");
         categoriaTest.setActivado(true);
         entityManager.merge(categoriaTest);
     }
@@ -38,7 +37,7 @@ class CategoriaRepositoryTest {
 
         assertAll(
                 () -> assertNotNull(result),
-                () -> assertEquals(TipoCategoria.DISNEY, result.get().getNombre()),
+                () -> assertEquals("DISNEY", result.get().getNombre()),
                 () -> assertTrue(result.get().getActivado())
         );
     }
@@ -49,19 +48,19 @@ class CategoriaRepositoryTest {
 
         assertAll(
                 () -> assertNotNull(result),
-                () -> assertEquals(TipoCategoria.DISNEY, result.get().getNombre()),
+                () -> assertEquals("DISNEY", result.get().getNombre()),
                 () -> assertTrue(result.get().getActivado())
         );
     }
 
     @Test
     void findByNombre() {
-        var result = repository.findByNombre(TipoCategoria.DISNEY);
+        var result = repository.findByNombre("DISNEY");
 
         assertAll(
                 () -> assertNotNull(result),
-                () -> assertEquals(TipoCategoria.DISNEY, result.getNombre()),
-                () -> assertTrue(result.getActivado())
+                () -> assertEquals("DISNEY", result.get().getNombre()),
+                () -> assertTrue(result.get().getActivado())
         );
     }
 }

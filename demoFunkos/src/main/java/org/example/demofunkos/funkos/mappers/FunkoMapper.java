@@ -1,7 +1,6 @@
 package org.example.demofunkos.funkos.mappers;
 
 import org.example.demofunkos.categoria.models.Categoria;
-import org.example.demofunkos.categoria.models.TipoCategoria;
 import org.example.demofunkos.funkos.dto.FunkoDto;
 import org.example.demofunkos.funkos.models.Funko;
 import org.springframework.stereotype.Component;

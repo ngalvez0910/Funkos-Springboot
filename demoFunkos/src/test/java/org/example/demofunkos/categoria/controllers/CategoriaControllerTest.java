@@ -5,9 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.example.demofunkos.categoria.dto.CategoriaDto;
 import org.example.demofunkos.categoria.mappers.CategoriaMapper;
 import org.example.demofunkos.categoria.models.Categoria;
-import org.example.demofunkos.categoria.models.TipoCategoria;
 import org.example.demofunkos.categoria.services.CategoriaServiceImpl;
-import org.example.demofunkos.funkos.models.Funko;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +52,7 @@ class CategoriaControllerTest {
     @BeforeEach
     void setUp() {
         categoriaTest.setId(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
-        categoriaTest.setNombre(TipoCategoria.DISNEY);
+        categoriaTest.setNombre("DISNEY");
         categoriaTest.setCreatedAt(LocalDateTime.now());
         categoriaTest.setUpdatedAt(LocalDateTime.now());
         categoriaTest.setActivado(true);
@@ -106,7 +104,7 @@ class CategoriaControllerTest {
     @Test
     void save() throws Exception {
         CategoriaDto nuevoCategoria = new CategoriaDto();
-        nuevoCategoria.setNombre(String.valueOf(TipoCategoria.DISNEY));
+        nuevoCategoria.setNombre("DISNEY");
         nuevoCategoria.setActivado(true);
 
         when(service.save(nuevoCategoria)).thenReturn(mapper.fromDto(nuevoCategoria));
@@ -132,12 +130,12 @@ class CategoriaControllerTest {
     @Test
     void update() throws Exception {
         CategoriaDto updatedCategoria = new CategoriaDto();
-        updatedCategoria.setNombre(String.valueOf(TipoCategoria.SUPERHEROES));
+        updatedCategoria.setNombre("SUPERHEROES");
         updatedCategoria.setActivado(true);
 
         Categoria expectedCategoria = new Categoria();
         expectedCategoria.setId(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
-        expectedCategoria.setNombre(TipoCategoria.SUPERHEROES);
+        expectedCategoria.setNombre("SUPERHEROES");
         expectedCategoria.setActivado(true);
 
         when(service.update(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), updatedCategoria)).thenReturn(expectedCategoria);
@@ -164,7 +162,7 @@ class CategoriaControllerTest {
     @Test
     void delete() throws Exception {
         CategoriaDto deletedCategoria = new CategoriaDto();
-        deletedCategoria.setNombre(String.valueOf(TipoCategoria.SUPERHEROES));
+        deletedCategoria.setNombre("SUPERHEROES");
         deletedCategoria.setActivado(true);
 
         when(service.update(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), deletedCategoria)).thenReturn(mapper.fromDto(deletedCategoria));

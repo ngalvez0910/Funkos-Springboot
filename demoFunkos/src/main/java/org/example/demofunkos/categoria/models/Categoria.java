@@ -22,9 +22,8 @@ public class Categoria {
     @GeneratedValue
     private UUID id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "nombre")
-    private TipoCategoria nombre;
+    @Column(name = "nombre", nullable = false, unique = true)
+    private String nombre;
 
     @Column(name = "created_at")
     @CreatedDate

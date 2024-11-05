@@ -1,23 +1,17 @@
 package org.example.demofunkos.categoria.validator;
 
-import org.example.demofunkos.categoria.models.TipoCategoria;
 import org.example.demofunkos.categoria.repositories.CategoriaRepository;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CategoriaValidator {
-    private CategoriaRepository repository;
+    private final CategoriaRepository categoriaRepository;
 
-    public CategoriaValidator(CategoriaRepository repository) {
-        this.repository = repository;
+    public CategoriaValidator(CategoriaRepository categoriaRepository) {
+        this.categoriaRepository = categoriaRepository;
     }
 
-    public boolean categoriaValida(String nombre) {
-        try {
-            TipoCategoria.valueOf(nombre);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+    public boolean isNameUnique(String nombre) {
+        return categoriaRepository.findByNombre(nombre).isEmpty();
     }
 }

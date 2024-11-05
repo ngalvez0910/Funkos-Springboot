@@ -47,7 +47,7 @@ public class FunkoServiceImpl implements FunkoService{
     @CachePut
     @Override
     public Funko save(FunkoDto funkoDto) {
-        var categoria = categoriaService.getByNombre(funkoDto.getCategoria());
+        var categoria = categoriaService.getByNombre(funkoDto.getCategoria().toUpperCase());
         return repository.save(mapper.toFunko(funkoDto, categoria));
     }
 

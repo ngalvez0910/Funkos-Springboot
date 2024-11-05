@@ -2,7 +2,7 @@ package org.example.demofunkos.storage.exceptions;
 
 import java.io.Serial;
 
-public abstract class StorageException extends RuntimeException {
+public class StorageException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = 43876691117560211L;

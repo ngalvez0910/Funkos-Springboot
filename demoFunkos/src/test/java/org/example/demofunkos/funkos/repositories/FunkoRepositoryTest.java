@@ -1,9 +1,7 @@
 package org.example.demofunkos.funkos.repositories;
 
 import org.example.demofunkos.categoria.models.Categoria;
-import org.example.demofunkos.categoria.models.TipoCategoria;
 import org.example.demofunkos.funkos.models.Funko;
-import org.example.demofunkos.funkos.repositories.FunkoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +22,8 @@ class FunkoRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
 
-    private static Categoria categoriaTest = new Categoria(UUID.randomUUID(), TipoCategoria.PELICULA, LocalDateTime.now(), LocalDateTime.now(), true);
-    private static Funko funkoTest = new Funko(1L, "Darth Vader", 10.99, categoriaTest, LocalDateTime.now(), LocalDateTime.now());
+    private static final Categoria categoriaTest = new Categoria(UUID.randomUUID(), "PELICULA", LocalDateTime.now(), LocalDateTime.now(), true);
+    private static final Funko funkoTest = new Funko(1L, "Darth Vader", 10.99, categoriaTest, LocalDateTime.now(), LocalDateTime.now());
 
     @BeforeEach
     void setUp() {

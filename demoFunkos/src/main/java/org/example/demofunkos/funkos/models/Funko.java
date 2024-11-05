@@ -4,12 +4,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.demofunkos.categoria.models.Categoria;
-import org.example.demofunkos.categoria.models.TipoCategoria;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -33,7 +31,7 @@ public class Funko {
     @NotBlank(message = "El nombre no puede estar vacio")
     private String nombre;
 
-    @Column(name = "precio")
+    @Column(name = "precio", nullable = false)
     @Min(value = 0)
     @Max(value = 50)
     private Double precio;

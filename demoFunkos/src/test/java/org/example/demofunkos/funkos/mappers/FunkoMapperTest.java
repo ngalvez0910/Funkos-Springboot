@@ -1,7 +1,6 @@
 package org.example.demofunkos.funkos.mappers;
 
 import org.example.demofunkos.categoria.models.Categoria;
-import org.example.demofunkos.categoria.models.TipoCategoria;
 import org.example.demofunkos.funkos.dto.FunkoDto;
 import org.example.demofunkos.funkos.models.Funko;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FunkoMapperTest {
 
-    private final Categoria categoria = new Categoria(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), TipoCategoria.DISNEY, LocalDateTime.now(), LocalDateTime.now(), true);
+    private final Categoria categoria = new Categoria(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), "DISNEY", LocalDateTime.now(), LocalDateTime.now(), true);
     private final FunkoMapper mapper = new FunkoMapper();
 
     @Test
