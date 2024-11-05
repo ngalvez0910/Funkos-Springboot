@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "nombre": "Funko Pop! Marvel: Avengers - Iron Man",
+    "categoria": "Marvel",
+    "precio": 15.99
+  },
+  {
+    "id": 2,
+    "nombre": "Funko Pop! Harry Potter - Hermione Granger",
+    "categoria": "Harry Potter",
+    "precio": 11.99
+  },
+  {
+    "id": 3,
+    "nombre": "Funko Pop! Marvel: Spider-Man",
+    "categoria": "Marvel",
+    "precio": 13.99
+  },
+  {
+    "id": 4,
+    "nombre": "Funko Pop! Marvel: Black Panther",
+    "categoria": "Marvel",
+    "precio": 14.99
+  },
+  {
+    "id": 5,
+    "nombre": "Funko Pop! Harry Potter - Harry Potter with Wand",
+    "categoria": "Harry Potter",
+    "precio": 12.49
+  },
+  {
+    "id": 6,
+    "nombre": "Funko Pop! Harry Potter - Ron Weasley",
+    "categoria": "Harry Potter",
+    "precio": 11.49
+  },
+  {
+    "id": 7,
+    "nombre": "Funko Pop! Harry Potter - Albus Dumbledore",
+    "categoria": "Harry Potter",
+    "precio": 13.99
+  },
+  {
+    "id": 8,
+    "nombre": "Funko Pop! Disney: Mickey Mouse",
+    "categoria": "Disney",
+    "precio": 10.99
+  },
+  {
+    "id": 9,
+    "nombre": "Funko Pop! Disney: Minnie Mouse",
+    "categoria": "Disney",
+    "precio": 10.99
+  },
+  {
+    "id": 10,
+    "nombre": "Funko Pop! Disney: Elsa (Frozen)",
+    "categoria": "Disney",
+    "precio": 12.99
+  }
+]
