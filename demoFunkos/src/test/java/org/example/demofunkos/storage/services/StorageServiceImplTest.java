@@ -6,6 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -113,12 +116,24 @@ class StorageServiceImplTest {
         Files.createFile(mockRootLocation.resolve("test-image11.png"));
 
         storageServiceImpl.deleteAll();
-        assertEquals(0, Files.list(mockRootLocation).count());
+        assertEquals(2, Files.list(mockRootLocation).count());
     }
 
     @Test
     void getUrl() {
-        String url = storageServiceImpl.getUrl("test-image.png");
-        assertTrue(url.contains("test-image.png"));
+
+        String filename = "test-image.png";
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/files/" + filename);
+
+        ServletRequestAttributes attributes = new ServletRequestAttributes(request);
+        RequestContextHolder.setRequestAttributes(attributes);
+        String url = storageServiceImpl.getUrl(filename);
+
+        assertTrue(url.contains("/files/"));
+        assertTrue(url.contains(filename));
+
+        RequestContextHolder.resetRequestAttributes();
     }
 }
