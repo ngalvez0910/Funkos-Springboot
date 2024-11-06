@@ -1,6 +1,5 @@
 package org.example.demofunkos.storage.services;
 
-import org.example.demofunkos.storage.exceptions.StorageException;
 import org.example.demofunkos.storage.exceptions.StorageNotFound;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +16,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,21 +26,22 @@ class StorageServiceImplTest {
     @Mock
     private MultipartFile multipartFile;
 
+    @Mock
+    private Path mockRootLocation;
+
     @InjectMocks
     private StorageServiceImpl storageServiceImpl;
-
-    private final Path rootLocation = Paths.get("imgs");
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        storageServiceImpl = new StorageServiceImpl(rootLocation.toString());
+        storageServiceImpl = new StorageServiceImpl(mockRootLocation.toString());
     }
 
     @Test
     void init() {
         storageServiceImpl.init();
-        assertTrue(Files.exists(rootLocation));
+        assertTrue(Files.exists(mockRootLocation));
     }
 
     @Test
@@ -78,9 +76,9 @@ class StorageServiceImplTest {
 
     @Test
     void loadAll() throws IOException {
-        Files.createDirectories(rootLocation);
-        Files.createFile(rootLocation.resolve("test-image.png"));
-        Files.createFile(rootLocation.resolve("test-image2.png"));
+        Files.createDirectories(mockRootLocation);
+        Files.createFile(mockRootLocation.resolve("test-image.png"));
+        Files.createFile(mockRootLocation.resolve("test-image2.png"));
 
         Stream<Path> files = storageServiceImpl.loadAll();
         assertEquals(2, files.count());
@@ -89,12 +87,12 @@ class StorageServiceImplTest {
     @Test
     void load() {
         Path path = storageServiceImpl.load("test-image.png");
-        assertEquals(rootLocation.resolve("test-image.png"), path);
+        assertEquals(mockRootLocation.resolve("test-image.png"), path);
     }
 
     @Test
     void loadAsResource() throws MalformedURLException {
-        Path path = rootLocation.resolve("test-image.png");
+        Path path = mockRootLocation.resolve("test-image.png");
         Resource resource = new UrlResource(path.toUri());
 
         when(resource.exists()).thenReturn(true);
@@ -106,7 +104,7 @@ class StorageServiceImplTest {
 
     @Test
     void loadAsResourceNotFound() throws MalformedURLException {
-        Path path = rootLocation.resolve("test-image.png");
+        Path path = mockRootLocation.resolve("test-image.png");
         Resource resource = new UrlResource(path.toUri());
 
         when(resource.exists()).thenReturn(false);
@@ -117,21 +115,21 @@ class StorageServiceImplTest {
 
     @Test
     void delete() throws IOException {
-        Files.createDirectories(rootLocation);
-        Files.createFile(rootLocation.resolve("test-image.png"));
+        Files.createDirectories(mockRootLocation);
+        Files.createFile(mockRootLocation.resolve("test-image.png"));
 
         storageServiceImpl.delete("test-image.png");
-        assertFalse(Files.exists(rootLocation.resolve("test-image.png")));
+        assertFalse(Files.exists(mockRootLocation.resolve("test-image.png")));
     }
 
     @Test
     void deleteAll() throws IOException {
-        Files.createDirectories(rootLocation);
-        Files.createFile(rootLocation.resolve("test-image1.png"));
-        Files.createFile(rootLocation.resolve("test-image2.png"));
+        Files.createDirectories(mockRootLocation);
+        Files.createFile(mockRootLocation.resolve("test-image1.png"));
+        Files.createFile(mockRootLocation.resolve("test-image2.png"));
 
         storageServiceImpl.deleteAll();
-        assertEquals(0, Files.list(rootLocation).count());
+        assertEquals(0, Files.list(mockRootLocation).count());
     }
 
     @Test
