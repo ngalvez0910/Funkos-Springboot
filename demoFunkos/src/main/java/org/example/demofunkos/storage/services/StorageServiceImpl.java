@@ -122,7 +122,21 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void deleteAll() {
         log.info("Eliminando todos los ficheros almacenados");
-        FileSystemUtils.deleteRecursively(rootLocation.toFile());
+
+        try {
+
+            Files.walk(this.rootLocation)
+                    .filter(path -> !path.equals(this.rootLocation))
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            throw new StorageException("No se puede eliminar el fichero: " + path + " " + e);
+                        }
+                    });
+        } catch (IOException e) {
+            throw new StorageException("Fallo al eliminar ficheros almacenados " + e);
+        }
     }
 
     @Override
