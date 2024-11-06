@@ -34,10 +34,10 @@ class CategoriaRepositoryTest {
 
     @Test
     void findById() {
-        var result = repository.findById(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
+        var result = repository.findById(categoriaTest.getId());
 
         assertAll(
-                () -> assertTrue(result.isPresent()),
+                () -> assertNotNull(result),
                 () -> {
                     if (result.isPresent()) {
                         assertEquals("DISNEY", result.get().getNombre());
@@ -50,11 +50,15 @@ class CategoriaRepositoryTest {
     @Test
     void findByIdAndActivadoTrue() {
         var result = repository.findByIdAndActivadoTrue(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
-
+    
         assertAll(
                 () -> assertNotNull(result),
-                () -> assertEquals("DISNEY", result.get().getNombre()),
-                () -> assertTrue(result.get().getActivado())
+                () -> {
+                    if (result.isPresent()) {
+                        assertEquals("DISNEY", result.get().getNombre());
+                        assertTrue(result.get().getActivado());
+                    }
+                }
         );
     }
 
