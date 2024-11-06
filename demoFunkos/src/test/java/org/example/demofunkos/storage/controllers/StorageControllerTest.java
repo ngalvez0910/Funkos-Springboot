@@ -1,34 +1,32 @@
 package org.example.demofunkos.storage.controllers;
 
-import org.example.demofunkos.storage.exceptions.StorageNotFound;
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.demofunkos.storage.services.StorageService;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 class StorageControllerTest {
 
     @MockBean
@@ -37,90 +35,82 @@ class StorageControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    private String myEndpoint = "/files";
-    private File myFile;
+    private final String endpoint = "/funkos/files";
+
+    @MockBean
+    private HttpServletRequest request;
+
+    @MockBean
+    private Resource resource;
 
     @BeforeEach
     void setUp() {
-        try {
-            myFile = File.createTempFile("data", "uno.txt");
-        } catch (IOException e) {
-            fail("Failed to create temporary file: " + e.getMessage());
-        }
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void getAllFiles() throws Exception {
-        given(storageService.loadAll()).willReturn(Stream.of(Paths.get(myFile.toURI())));
+    void serveFile() throws Exception {
+        String filename = "test-image.png";
+        String filePath = "imgs/test-image.png";
 
-        MockHttpServletResponse response = mvc.perform(get(myEndpoint))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("files", Matchers.contains("http://localhost/files/uno.txt")))
+        when(storageService.loadAsResource(filename)).thenReturn(resource);
+        when(request.getServletContext().getMimeType(filePath)).thenReturn(MediaType.IMAGE_JPEG_VALUE);
+        when(resource.getFile()).thenReturn(new File(filePath));
+
+        MockHttpServletResponse response = mvc.perform(
+                        get(endpoint + "/" + filename)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
         assertAll(
                 () -> assertEquals(HttpStatus.OK.value(), response.getStatus()),
-                () -> assertTrue(response.getContentAsString().contains("http://localhost/files/uno.txt"))
+                () -> assertEquals(MediaType.IMAGE_JPEG_VALUE, response.getContentType()),
+                () -> assertTrue(response.getContentLength() > 0)
         );
+
+        verify(storageService, times(1)).loadAsResource(filename);
     }
 
     @Test
-    void listUploadedFiles_returnsEmptyGetAll() throws Exception {
-        given(storageService.loadAll()).willReturn(Stream.empty());
+    void serveFileWithUnknownMimeType() throws Exception {
+        String filename = "test-image.png";
+        String filePath = "imgs/test-image.png";
 
-        MockHttpServletResponse response = mvc.perform(get(myEndpoint))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("files", Matchers.empty()))
+        when(storageService.loadAsResource(filename)).thenReturn(resource);
+        when(resource.getFile()).thenReturn(new File(filePath));
+        when(request.getServletContext().getMimeType(filePath)).thenReturn(null);
+
+        MockHttpServletResponse response = mvc.perform(
+                        get(endpoint + "/" + filename)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
         assertAll(
                 () -> assertEquals(HttpStatus.OK.value(), response.getStatus()),
-                () -> assertTrue(response.getContentAsString().contains("[]"))
+                () -> assertEquals(MediaType.APPLICATION_OCTET_STREAM_VALUE, response.getContentType()),
+                () -> assertEquals(resource, response.getContentLength() > 0)
         );
+
+        verify(storageService, times(1)).loadAsResource(filename);
     }
 
     @Test
-    void getFileByName() throws Exception {
-        given(storageService.loadAsResource("uno.txt")).willReturn(new FileSystemResource(myFile));
-    
-        MockHttpServletResponse response = mvc.perform(get("/files/uno.txt"))
-                .andExpect(status().isOk())
-                .andReturn().getResponse();
-    
-        assertAll(
-                () -> assertEquals(HttpStatus.OK.value(), response.getStatus()),
-                () -> assertTrue(response.getContentAsString().contains("data"))
-        );
-    }
+    void serveFileThrowsException() throws Exception {
+        String filename = "test-image.png";
 
-    /*
-    @Test
-    void handleFileUpload() throws Exception {
-        given(storageService.store(myFile)).willReturn(Paths.get(myFile.toURI()));
+        when(storageService.loadAsResource(filename)).thenReturn(resource);
+        when(resource.getFile()).thenThrow(new IOException());
 
-        MockHttpServletResponse response = mvc.perform(post(myEndpoint)
-                        .param("file", myFile.getName()))
-                .andExpect(status().isCreated())
+        MockHttpServletResponse response = mvc.perform(
+                        get(endpoint + "/" + filename)
+                                .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
         assertAll(
-                () -> assertEquals(HttpStatus.CREATED.value(), response.getStatus()),
-                () -> assertTrue(response.getContentAsString().contains("File uploaded"))
+                () -> assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus()),
+                () -> assertTrue(response.getContentAsString().contains("No se puede determinar el tipo de fichero"))
         );
-    }
 
-     */
-
-    @Test
-    public void should404WhenMissingFile() throws Exception {
-        given(storageService.loadAsResource("test.txt")).willThrow(StorageNotFound.class);
-
-        MockHttpServletResponse response = mvc.perform(get("/files/test.txt"))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse();
-
-        assertAll(
-                () -> assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus())
-        );
+        verify(storageService, times(1)).loadAsResource(filename);
     }
 }

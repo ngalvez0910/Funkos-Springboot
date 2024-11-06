@@ -1,113 +1,142 @@
 package org.example.demofunkos.storage.services;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.Resource;
-import org.springframework.mock.web.MockMultipartFile;
-import org.example.demofunkos.storage.config.StorageConfig;
 import org.example.demofunkos.storage.exceptions.StorageException;
 import org.example.demofunkos.storage.exceptions.StorageNotFound;
-import java.net.URI;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-
-@ExtendWith(MockitoExtension.class)
 class StorageServiceImplTest {
 
     @Mock
-    private StorageConfig config;
+    private MultipartFile multipartFile;
 
     @InjectMocks
-    private StorageServiceImpl storageService;
+    private StorageServiceImpl storageServiceImpl;
+
+    private final Path rootLocation = Paths.get("imgs");
 
     @BeforeEach
-    public void setUp() {
-        storageService = new StorageServiceImpl(config);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        storageServiceImpl = new StorageServiceImpl(rootLocation.toString());
     }
 
     @Test
-public void testConstructorThrowsExceptionWhenLocationEmpty() {
-    StorageConfig config = mock(StorageConfig.class);
-    when(config.getLocation()).thenReturn("  ");
+    void init() {
+        storageServiceImpl.init();
+        assertTrue(Files.exists(rootLocation));
+    }
 
-    assertThrows(StorageException.class, () -> {
-        new StorageServiceImpl(config);
-    });
-}
-@Test
-public void testStoreShouldThrowStorageExceptionWhenFileIsEmpty() {
-    // Arrange
-    MockMultipartFile emptyFile = new MockMultipartFile("test.txt", "test.txt", "text/plain", new byte[0]);
+    @Test
+    void store() throws IOException {
+        String filename = "test-image.png";
+        when(multipartFile.getOriginalFilename()).thenReturn(filename);
+        when(multipartFile.isEmpty()).thenReturn(false);
+        when(multipartFile.getInputStream()).thenReturn(mock(InputStream.class));
 
-    // Act & Assert
-    StorageException exception = assertThrows(StorageException.class, () -> {
-        storageService.store(emptyFile);
-    });
+        String storedFilename = storageServiceImpl.store(multipartFile);
+        assertTrue(storedFilename.contains("test-image"));
+        verify(multipartFile, times(1)).getInputStream();
+    }
 
-    assertEquals("Failed to store empty file.", exception.getMessage());
-}
-@Test
-public void testLoadAsResourceThrowsStorageNotFoundWhenFileNotExistsOrNotReadable() throws Exception {
-    // Arrange
-    String filename = "non-existent-file.txt";
-    Path filePath = mock(Path.class);
-    Resource resource = mock(Resource.class);
-    when(storageService.load(filename)).thenReturn(filePath);
-    when(filePath.toUri()).thenReturn(new URI("file:///non-existent-file.txt"));
-    when(resource.exists()).thenReturn(false);
-    when(resource.isReadable()).thenReturn(false);
+    @Test
+    void storeEmptyFile() {
+        String filename = "test-image.png";
+        when(multipartFile.getOriginalFilename()).thenReturn(filename);
+        when(multipartFile.isEmpty()).thenReturn(true);
 
-    // Act & Assert
-    StorageNotFound exception = assertThrows(StorageNotFound.class, () -> {
-        storageService.loadAsResource(filename);
-    });
+        assertThrows(StorageNotFound.class, () -> storageServiceImpl.store(multipartFile));
+    }
 
-    assertEquals("Could not read file: " + filename, exception.getMessage());
-}
-@Test
-public void testDeleteAllShouldDeleteAllFilesAndDirectories() throws IOException {
-    // Arrange
-    Path testDir = Files.createTempDirectory("test-storage");
-    Path testFile = testDir.resolve("test-file.txt");
-    Files.write(testFile, "test content".getBytes());
-    
-    StorageConfig config = mock(StorageConfig.class);
-    when(config.getLocation()).thenReturn(testDir.toString());
-    StorageServiceImpl storageService = new StorageServiceImpl(config);
+    @Test
+    void storeFileWithRelativePath() {
+        String filename = "../test-image.png";
+        when(multipartFile.getOriginalFilename()).thenReturn(filename);
+        when(multipartFile.isEmpty()).thenReturn(false);
 
-    // Act
-    storageService.deleteAll();
+        assertThrows(StorageNotFound.class, () -> storageServiceImpl.store(multipartFile));
+    }
 
-    // Assert
-    assertFalse(Files.exists(testFile), "Test file should not exist");
-    assertFalse(Files.exists(testDir), "Test directory should not exist");
-}
-@Test
-public void testLoadAllReturnsEmptyStreamWhenNoFilesExist() throws IOException {
-    // Arrange
-    Path emptyDir = Files.createTempDirectory("empty-test-dir");
-    StorageConfig config = mock(StorageConfig.class);
-    when(config.getLocation()).thenReturn(emptyDir.toString());
-    StorageServiceImpl storageService = new StorageServiceImpl(config);
+    @Test
+    void loadAll() throws IOException {
+        Files.createDirectories(rootLocation);
+        Files.createFile(rootLocation.resolve("test-image.png"));
+        Files.createFile(rootLocation.resolve("test-image2.png"));
 
-    // Act
-    Stream<Path> result = storageService.loadAll();
+        Stream<Path> files = storageServiceImpl.loadAll();
+        assertEquals(2, files.count());
+    }
 
-    // Assert
-    assertNotNull(result);
-    assertEquals(0, result.count());
+    @Test
+    void load() {
+        Path path = storageServiceImpl.load("test-image.png");
+        assertEquals(rootLocation.resolve("test-image.png"), path);
+    }
 
-    // Clean up
-    Files.delete(emptyDir);
-}
+    @Test
+    void loadAsResource() throws MalformedURLException {
+        Path path = rootLocation.resolve("test-image.png");
+        Resource resource = new UrlResource(path.toUri());
+
+        when(resource.exists()).thenReturn(true);
+        when(resource.isReadable()).thenReturn(true);
+
+        Resource returnedResource = storageServiceImpl.loadAsResource("test-image.png");
+        assertNotNull(returnedResource);
+    }
+
+    @Test
+    void loadAsResourceNotFound() throws MalformedURLException {
+        Path path = rootLocation.resolve("test-image.png");
+        Resource resource = new UrlResource(path.toUri());
+
+        when(resource.exists()).thenReturn(false);
+        when(resource.isReadable()).thenReturn(false);
+
+        assertThrows(StorageNotFound.class, () -> storageServiceImpl.loadAsResource("test-image.png"));
+    }
+
+    @Test
+    void delete() throws IOException {
+        Files.createDirectories(rootLocation);
+        Files.createFile(rootLocation.resolve("test-image.png"));
+
+        storageServiceImpl.delete("test-image.png");
+        assertFalse(Files.exists(rootLocation.resolve("test-image.png")));
+    }
+
+    @Test
+    void deleteAll() throws IOException {
+        Files.createDirectories(rootLocation);
+        Files.createFile(rootLocation.resolve("test-image1.png"));
+        Files.createFile(rootLocation.resolve("test-image2.png"));
+
+        storageServiceImpl.deleteAll();
+        assertEquals(0, Files.list(rootLocation).count());
+    }
+
+    @Test
+    void getUrl() {
+        String url = storageServiceImpl.getUrl("test-image.png");
+        assertTrue(url.contains("test-image.png"));
+    }
 }
