@@ -20,6 +20,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -41,9 +42,6 @@ class StorageControllerTest {
     private final String endpoint = "/funkos/files";
 
     @MockBean
-    private HttpServletRequest request;
-
-    @MockBean
     private Resource resource;
 
     @BeforeEach
@@ -55,15 +53,20 @@ class StorageControllerTest {
     void serveFile() throws Exception {
         String filename = "test-image3.png";
 
+        InputStream mockInputStream = getClass().getClassLoader().getResourceAsStream("test-image3.png");
+
+        assertNotNull(mockInputStream);
+
         Resource mockResource = mock(Resource.class);
-        InputStream mockInputStream = new ByteArrayInputStream("mock content".getBytes());
+
         when(mockResource.getInputStream()).thenReturn(mockInputStream);
+        when(mockResource.exists()).thenReturn(true);
 
         when(storageService.loadAsResource(filename)).thenReturn(mockResource);
 
         MockHttpServletResponse response = mvc.perform(
                         get(endpoint + "/" + filename)
-                                .accept(MediaType.APPLICATION_JSON))
+                                .accept(MediaType.IMAGE_PNG))
                 .andReturn().getResponse();
 
         assertAll(
@@ -76,10 +79,13 @@ class StorageControllerTest {
 
     @Test
     void serveFileThrowsException() throws Exception {
-        String filename = "test-image3.kei";
+        String filename = "test-image3.png";
+
+        Resource resource = mock(Resource.class);
+
+        when(resource.getInputStream()).thenThrow(new IOException("No se puede determinar el tipo de fichero"));
 
         when(storageService.loadAsResource(filename)).thenReturn(resource);
-        when(resource.getInputStream()).thenThrow(new IOException("Unable to determine file type"));
 
         MockHttpServletResponse response = mvc.perform(
                         get(endpoint + "/" + filename)
@@ -93,4 +99,5 @@ class StorageControllerTest {
 
         verify(storageService, times(1)).loadAsResource(filename);
     }
+
 }
