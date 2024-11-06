@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.3.4"
 	id("io.spring.dependency-management") version "1.1.6"
+	id("jacoco")
 }
 
 group = "org.example"
@@ -25,12 +26,9 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
-
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("com.h2database:h2") // base de datos a usar, puede ser otra
-
+	implementation("com.h2database:h2")
 	implementation("org.springframework.boot:spring-boot-starter-cache")
-
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
@@ -40,4 +38,5 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	finalizedBy("jacocoTestReport")
 }

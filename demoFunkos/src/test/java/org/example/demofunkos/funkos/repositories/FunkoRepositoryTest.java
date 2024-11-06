@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,11 +31,8 @@ class FunkoRepositoryTest {
         categoriaTest = entityManager.merge(categoriaTest);
         entityManager.flush();
         funkoTest.setCategoria(categoriaTest);
-        funkoTest = entityManager.merge(funkoTest);
-        entityManager.flush();
+        funkoTest = repository.saveAndFlush(funkoTest);
     }
-
-
 
     @Test
     void findAll() {
