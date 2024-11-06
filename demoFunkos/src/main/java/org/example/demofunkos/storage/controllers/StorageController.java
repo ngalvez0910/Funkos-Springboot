@@ -1,6 +1,5 @@
 package org.example.demofunkos.storage.controllers;
 
-import org.example.demofunkos.storage.exceptions.StorageNotFound;
 import org.example.demofunkos.storage.services.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -27,7 +26,7 @@ public class StorageController {
     }
 
     @GetMapping("/")
-    public String listUploadedFiles(Model model) throws IOException {
+    public String getAllFiles(Model model) throws IOException {
 
         model.addAttribute("files", storageService.loadAll().map(
                         path -> MvcUriComponentsBuilder.fromMethodName(StorageController.class,
@@ -39,7 +38,7 @@ public class StorageController {
 
     @GetMapping("/files/{filename:.+}")
     @ResponseBody
-    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+    public ResponseEntity<Resource> getFileByName(@PathVariable String filename) {
 
         Resource file = storageService.loadAsResource(filename);
 
@@ -51,8 +50,8 @@ public class StorageController {
     }
 
     @PostMapping("/")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file,
-                                   RedirectAttributes redirectAttributes) {
+    public String subirFichero(@RequestParam("file") MultipartFile file,
+                               RedirectAttributes redirectAttributes) {
 
         storageService.store(file);
         redirectAttributes.addFlashAttribute("message",
@@ -60,10 +59,4 @@ public class StorageController {
 
         return "redirect:/";
     }
-
-    @ExceptionHandler(StorageNotFound.class)
-    public ResponseEntity<?> handleStorageFileNotFound(StorageNotFound exc) {
-        return ResponseEntity.notFound().build();
-    }
-
 }
