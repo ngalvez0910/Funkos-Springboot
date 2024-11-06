@@ -34,6 +34,7 @@ class FunkoRepositoryTest {
         funkoTest = repository.saveAndFlush(funkoTest);
     }
 
+
     @Test
     void findAll() {
         var result = repository.findAll();
@@ -48,13 +49,15 @@ class FunkoRepositoryTest {
 
     @Test
     void findById() {
-        var result = repository.findById(1L);
+        Long id = funkoTest.getId();
+
+        var result = repository.findById(id);
 
         assertAll(
-            () -> assertNotNull(result),
-            () -> assertEquals(funkoTest.getNombre(), result.get().getNombre()),
-            () -> assertEquals(funkoTest.getPrecio(), result.get().getPrecio()),
-            () -> assertEquals(funkoTest.getCategoria(), result.get().getCategoria())
+                () -> assertTrue(result.isPresent()),
+                () -> assertEquals(funkoTest.getNombre(), result.get().getNombre()),
+                () -> assertEquals(funkoTest.getPrecio(), result.get().getPrecio()),
+                () -> assertEquals(funkoTest.getCategoria(), result.get().getCategoria())
         );
     }
 
