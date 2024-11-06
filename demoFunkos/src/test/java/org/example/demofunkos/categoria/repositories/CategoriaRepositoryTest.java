@@ -48,6 +48,18 @@ class CategoriaRepositoryTest {
     }
 
     @Test
+    void findByIdNotFound() {
+        var result = repository.findById(UUID.randomUUID());
+
+        assertAll(
+                () -> assertNotNull(result),
+                () -> {
+                    assertTrue(result.isEmpty());
+                }
+        );
+    }
+
+    @Test
     void findByIdAndActivadoTrue() {
         var result = repository.findByIdAndActivadoTrue(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
     
@@ -63,6 +75,18 @@ class CategoriaRepositoryTest {
     }
 
     @Test
+    void findByIdAndActivadoTrueNotFound() {
+        var result = repository.findByIdAndActivadoTrue(UUID.randomUUID());
+
+        assertAll(
+                () -> assertNotNull(result),
+                () -> {
+                    assertTrue(result.isEmpty());
+                }
+        );
+    }
+
+    @Test
     void findByNombre() {
         var result = repository.findByNombre("DISNEY");
 
@@ -70,6 +94,16 @@ class CategoriaRepositoryTest {
                 () -> assertNotNull(result),
                 () -> assertEquals("DISNEY", result.get().getNombre()),
                 () -> assertTrue(result.get().getActivado())
+        );
+    }
+
+    @Test
+    void findByNombreNotFound() {
+        var result = repository.findByNombre("CategoriaTestNotFound");
+
+        assertAll(
+                () -> assertNotNull(result),
+                () -> assertTrue(result.isEmpty())
         );
     }
 }

@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -75,6 +77,20 @@ class CategoriaServiceImplTest {
     }
 
     @Test
+    void getByIdNotFound() {
+        when(repository.findById(UUID.fromString("4182d617-ec89-4fbc-be95-85e461778700"))).thenReturn(Optional.empty());
+
+        ResponseStatusException thrown = assertThrows(
+                ResponseStatusException.class, () -> service.getById(UUID.fromString("4182d617-ec89-4fbc-be95-85e461778700"))
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, thrown.getStatusCode());
+        assertEquals("La categoria con id 4182d617-ec89-4fbc-be95-85e461778700 no se ha encontrado.", thrown.getReason());
+
+        verify(repository, times(1)).findById(UUID.fromString("4182d617-ec89-4fbc-be95-85e461778700"));
+    }
+
+    @Test
     void getByNombre() {
         when(repository.findByNombre("DISNEY")).thenReturn(Optional.ofNullable(categoriaTest));
 
@@ -87,6 +103,20 @@ class CategoriaServiceImplTest {
         );
 
         verify(repository, times(1)).findByNombre("DISNEY");
+    }
+
+    @Test
+    void getByNombreNotFound() {
+        when(repository.findByNombre("CategoriaTestNotFound")).thenReturn(Optional.empty());
+
+        ResponseStatusException thrown = assertThrows(
+                ResponseStatusException.class, () -> service.getByNombre("CategoriaTestNotFound")
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, thrown.getStatusCode());
+        assertEquals("La categoria CategoriaTestNotFound no existe", thrown.getReason());
+
+        verify(repository, times(1)).findByNombre("CategoriaTestNotFound");
     }
 
     @Test
@@ -152,6 +182,25 @@ class CategoriaServiceImplTest {
     }
 
     @Test
+    void updateNotFound() {
+        UUID id = UUID.fromString("4182d617-ec89-4fbc-be95-85e461778700");
+        CategoriaDto categoriaUpdateDto = new CategoriaDto();
+        categoriaUpdateDto.setNombre("CategoriaTestUpdate");
+        categoriaUpdateDto.setActivado(true);
+
+        when(repository.findById(id)).thenReturn(Optional.empty());
+
+        ResponseStatusException thrown = assertThrows(
+                ResponseStatusException.class, () -> service.update(UUID.fromString("4182d617-ec89-4fbc-be95-85e461778700"), categoriaUpdateDto)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, thrown.getStatusCode());
+        assertEquals("La categoria con id 4182d617-ec89-4fbc-be95-85e461778700 no se ha encontrado.", thrown.getReason());
+
+        verify(repository, times(1)).findById(id);
+    }
+
+    @Test
     void delete() {
         UUID id = UUID.fromString("79741172-6da6-47f1-9525-a6c83053f856");
         CategoriaDto categoriaBorrada = new CategoriaDto();
@@ -185,5 +234,34 @@ class CategoriaServiceImplTest {
         verify(repository, times(1)).findByIdAndActivadoTrue(id);
         verify(repository, times(1)).save(updatedCategoriaEntity);
         verify(mapper, times(1)).toCategoria(categoriaBorrada, categoriaExistente);
+    }
+
+    @Test
+    void deleteNotFound() {
+        UUID id = UUID.fromString("4182d617-ec89-4fbc-be95-85e461778766");
+        CategoriaDto categoriaBorradaDto = new CategoriaDto();
+        categoriaBorradaDto.setNombre("CategoriaTest");
+        categoriaBorradaDto.setActivado(true);
+
+        Categoria categoriaExistente = new Categoria();
+        categoriaExistente.setId(id);
+        categoriaExistente.setNombre("CategoriaTest");
+        categoriaExistente.setActivado(true);
+
+        Categoria categoriaBorrada = new Categoria();
+        categoriaBorrada.setId(id);
+        categoriaBorrada.setNombre("CategoriaTest");
+        categoriaBorrada.setActivado(true);
+
+        when(repository.findByIdAndActivadoTrue(id)).thenReturn(Optional.empty());
+
+        ResponseStatusException thrown = assertThrows(
+                ResponseStatusException.class, () -> service.delete(UUID.fromString("4182d617-ec89-4fbc-be95-85e461778766"), categoriaBorradaDto)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, thrown.getStatusCode());
+        assertEquals("La categoria con id 4182d617-ec89-4fbc-be95-85e461778766 no se ha encontrado.", thrown.getReason());
+
+        verify(repository, times(1)).findByIdAndActivadoTrue(id);
     }
 }
