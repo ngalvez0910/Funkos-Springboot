@@ -3,6 +3,7 @@ package org.example.demofunkos.storage.controllers;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.demofunkos.storage.exceptions.StorageBadRequest;
 import org.example.demofunkos.storage.exceptions.StorageException;
+import org.example.demofunkos.storage.exceptions.StorageNotFound;
 import org.example.demofunkos.storage.services.StorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,6 +98,20 @@ class StorageControllerTest {
                 () -> assertTrue(response.getContentAsString().contains("No se puede determinar el tipo de fichero"))
         );
 
+        verify(storageService, times(1)).loadAsResource(filename);
+    }
+
+    @Test
+    public void testServeFile_FileNotFound() throws Exception {
+        String filename = "nonexistentfile.txt";
+
+        when(storageService.loadAsResource(anyString())).thenThrow(new StorageNotFound("File not found"));
+        MockHttpServletResponse response = mvc.perform(
+                        get(endpoint + "/" + filename)
+                                .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
         verify(storageService, times(1)).loadAsResource(filename);
     }
 
