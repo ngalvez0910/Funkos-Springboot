@@ -6,15 +6,21 @@ import org.example.demofunkos.funkos.dto.FunkoDto;
 import org.example.demofunkos.funkos.mappers.FunkoMapper;
 import org.example.demofunkos.funkos.models.Funko;
 import org.example.demofunkos.funkos.repositories.FunkoRepository;
+import org.example.demofunkos.notifications.config.WebSocketConfig;
+import org.example.demofunkos.notifications.config.WebSocketHandler;
+import org.example.demofunkos.notifications.mappers.NotificacionMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,8 +39,19 @@ class FunkoServiceImplTest {
     @Mock
     private CategoriaService categoriaService;
 
+    @Mock
+    private WebSocketConfig webSocketConfig;
+
+    WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
+
+    @Mock
+    private NotificacionMapper notificacionMapper;
+
     @InjectMocks
     private FunkoServiceImpl service;
+
+    @Captor
+    private ArgumentCaptor<Funko> funkoCaptor;
 
     private Funko funkoTest;
     private Categoria categoriaTest;
@@ -50,6 +67,8 @@ class FunkoServiceImplTest {
         funkoTest.setNombre("Darth Vader");
         funkoTest.setPrecio(10.99);
         funkoTest.setCategoria(categoriaTest);
+
+        service.setWebSocketHandler(webSocketHandler);
     }
 
     @Test
@@ -100,7 +119,7 @@ class FunkoServiceImplTest {
     }
 
     @Test
-    void save() {
+    void save() throws IOException {
         Categoria nuevaCategoria = new Categoria();
         nuevaCategoria.setId(UUID.fromString("5790bdd4-8898-4c61-b547-bc26952dc2a3"));
         nuevaCategoria.setNombre("DISNEY");
@@ -119,6 +138,7 @@ class FunkoServiceImplTest {
         when(mapper.toFunko(nuevoFunko, nuevaCategoria)).thenReturn(funkoMapped);
         when(repository.save(funkoMapped)).thenReturn(funkoMapped);
         when(categoriaService.getByNombre("DISNEY")).thenReturn(nuevaCategoria);
+        doNothing().when(webSocketHandler).sendMessage(any());
 
         var result = service.save(nuevoFunko);
 
@@ -135,7 +155,7 @@ class FunkoServiceImplTest {
     }
 
     @Test
-    void update() {
+    void update() throws IOException {
         Categoria updatedCategoria = new Categoria();
         updatedCategoria.setId(UUID.fromString("5790bdd4-8898-4c61-b547-bc26952dc2a3"));
         updatedCategoria.setNombre("SUPERHEROES");
@@ -155,6 +175,7 @@ class FunkoServiceImplTest {
         when(repository.findById(2L)).thenReturn(Optional.of(updatedFunko));
         when(repository.save(updatedFunko)).thenReturn(updatedFunko);
         when(categoriaService.getByNombre("SUPERHEROES")).thenReturn(updatedCategoria);
+        doNothing().when(webSocketHandler).sendMessage(any());
     
         var result = service.update(2L, updatedFunkoDto);
     
@@ -202,8 +223,9 @@ class FunkoServiceImplTest {
     }
 
     @Test
-    void delete() {
+    void delete() throws IOException {
         when(repository.findById(1L)).thenReturn(Optional.of(funkoTest));
+        doNothing().when(webSocketHandler).sendMessage(any());
 
         var result = service.delete(1L);
 
