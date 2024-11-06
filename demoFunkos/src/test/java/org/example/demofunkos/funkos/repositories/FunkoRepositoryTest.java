@@ -79,4 +79,22 @@ class FunkoRepositoryTest {
                 () -> assertEquals(funkoTest.getCategoria(), savedFunko.getCategoria())
         );
     }
+
+    @Test
+    void findByNombre() {
+        var result = repository.findByNombre("Darth Vader");
+
+        assertAll(
+                () -> assertEquals(funkoTest.getNombre(), result.get().getNombre()),
+                () -> assertEquals(funkoTest.getPrecio(), result.get().getPrecio()),
+                () -> assertEquals(funkoTest.getCategoria(), result.get().getCategoria())
+        );
+    }
+
+    @Test
+    void findByNombreNotFound() {
+        var result = repository.findByNombre("FunkoTestNotFound");
+
+        assertNull(result.orElse(null));
+    }
 }

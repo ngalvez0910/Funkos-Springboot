@@ -89,7 +89,7 @@ class FunkoControllerTest {
 
     @Test
     void getById() throws Exception {
-        when(service.getById(1L)).thenReturn(funkoTest);
+        when(service.getById(String.valueOf(1L))).thenReturn(funkoTest);
 
         MockHttpServletResponse response = mvc.perform(
                 get(myEndpoint + "/1")
@@ -106,7 +106,7 @@ class FunkoControllerTest {
                 () -> assertEquals(res.getCategoria(), funkoTest.getCategoria())
         );
 
-        verify(service, times(1)).getById(1L);
+        verify(service, times(1)).getById(String.valueOf(1L));
     }
 
     @Test
@@ -159,7 +159,7 @@ class FunkoControllerTest {
         funko.setPrecio(updateFunko.getPrecio());
         funko.setCategoria(updatedCategoria);
 
-        when(service.update(2L, updateFunko)).thenReturn(mapper.toFunkoUpdate(updateFunko, funko, updatedCategoria));
+        when(service.update(String.valueOf(2L), updateFunko)).thenReturn(mapper.toFunkoUpdate(updateFunko, funko, updatedCategoria));
 
         MockHttpServletResponse response = mvc.perform(
                 put(myEndpoint + "/2")
@@ -176,12 +176,12 @@ class FunkoControllerTest {
                 () -> assertEquals(res.getCategoria().getNombre(), updateFunko.getCategoria())
         );
 
-        verify(service, times(1)).update(2L, updateFunko);
+        verify(service, times(1)).update(String.valueOf(2L), updateFunko);
     }
 
     @Test
     void delete() throws Exception {
-        when(service.delete(1L)).thenReturn(funkoTest);
+        when(service.delete(String.valueOf(1L))).thenReturn(funkoTest);
 
         MockHttpServletResponse response = mvc.perform(
                 MockMvcRequestBuilders.delete(myEndpoint + "/1")
@@ -190,6 +190,6 @@ class FunkoControllerTest {
 
         assertEquals(response.getStatus(), HttpStatus.OK.value());
 
-        verify(service, times(1)).delete(1L);
+        verify(service, times(1)).delete(String.valueOf(1L));
     }
 }
