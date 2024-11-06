@@ -1,17 +1,15 @@
 package org.example.demofunkos.storage.services;
 
 import org.example.demofunkos.storage.exceptions.StorageNotFound;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,17 +18,17 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith(MockitoExtension.class)
 class StorageServiceImplTest {
 
     @Mock
     private MultipartFile multipartFile;
 
-    @Mock
     private Path mockRootLocation;
 
-    @InjectMocks
     private StorageServiceImpl storageServiceImpl;
-    
+
     @BeforeEach
     void setUp() {
         mockRootLocation = Paths.get("test_imgs");
@@ -46,7 +44,7 @@ class StorageServiceImplTest {
     @Test
     void store() throws IOException {
         String filename = "test-image3.png";
-        Files.createFile(mockRootLocation.resolve("test-imag3.png"));
+        Files.createFile(mockRootLocation.resolve("test-image3.png"));
         when(multipartFile.getOriginalFilename()).thenReturn(filename);
         when(multipartFile.isEmpty()).thenReturn(false);
         when(multipartFile.getInputStream()).thenReturn(mock(InputStream.class));
@@ -74,14 +72,14 @@ class StorageServiceImplTest {
         assertThrows(StorageNotFound.class, () -> storageServiceImpl.store(multipartFile));
     }
 
+    @Order(1)
     @Test
     void loadAll() throws IOException {
         Files.createDirectories(mockRootLocation);
-        Files.createFile(mockRootLocation.resolve("test-image.png"));
         Files.createFile(mockRootLocation.resolve("test-image2.png"));
 
         Stream<Path> files = storageServiceImpl.loadAll();
-        assertEquals(2, files.count());
+        assertEquals(3, files.count());
     }
 
     @Test
