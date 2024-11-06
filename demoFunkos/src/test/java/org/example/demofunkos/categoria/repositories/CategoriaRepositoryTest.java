@@ -29,6 +29,7 @@ class CategoriaRepositoryTest {
         categoriaTest.setNombre("DISNEY");
         categoriaTest.setActivado(true);
         entityManager.merge(categoriaTest);
+        entityManager.flush();
     }
 
     @Test
@@ -36,9 +37,13 @@ class CategoriaRepositoryTest {
         var result = repository.findById(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
 
         assertAll(
-                () -> assertNotNull(result),
-                () -> assertEquals("DISNEY", result.get().getNombre()),
-                () -> assertTrue(result.get().getActivado())
+                () -> assertTrue(result.isPresent()),
+                () -> {
+                    if (result.isPresent()) {
+                        assertEquals("DISNEY", result.get().getNombre());
+                        assertTrue(result.get().getActivado());
+                    }
+                }
         );
     }
 

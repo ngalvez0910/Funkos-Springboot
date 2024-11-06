@@ -168,10 +168,12 @@ class CategoriaControllerTest {
         when(service.update(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), deletedCategoria)).thenReturn(mapper.fromDto(deletedCategoria));
 
         MockHttpServletResponse response = mvc.perform(
-                        put(myEndpoint + "/12d45756-3895-49b2-90d3-c4a12d5ee081")
+                        patch(myEndpoint + "/12d45756-3895-49b2-90d3-c4a12d5ee081")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(deletedCategoria)))
                 .andReturn().getResponse();
+
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
 
         Categoria res = objectMapper.readValue(response.getContentAsString(), Categoria.class);
 

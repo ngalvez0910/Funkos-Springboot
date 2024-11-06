@@ -29,6 +29,7 @@ class FunkoRepositoryTest {
     void setUp() {
         entityManager.merge(categoriaTest);
         entityManager.flush();
+        funkoTest.setCategoria(categoriaTest);
         entityManager.merge(funkoTest);
         entityManager.flush();
     }

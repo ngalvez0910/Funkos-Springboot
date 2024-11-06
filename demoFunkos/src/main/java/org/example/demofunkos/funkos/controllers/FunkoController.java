@@ -41,7 +41,7 @@ public class FunkoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Funko> update(@PathVariable Long id, @Valid @RequestBody FunkoDto funkoDto) {
         var res = service.update(id, funkoDto);
         return ResponseEntity.ok(res);
