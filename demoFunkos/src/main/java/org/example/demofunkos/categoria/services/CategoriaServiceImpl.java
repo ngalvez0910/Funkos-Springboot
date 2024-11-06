@@ -37,7 +37,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     }
 
     @Override
-    @Cacheable(key = "#id")
+    @Cacheable
     public Categoria getById(UUID id) {
         return repository.findById(id).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La categoria con id " + id + " no se ha encontrado.")
@@ -45,7 +45,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     }
 
     @Override
-    @Cacheable(key = "#nombre")
+    @Cacheable
     public Categoria getByNombre(String nombre) {
         return repository.findByNombre(nombre).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La categoria " + nombre + " no existe")
@@ -53,7 +53,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     }
 
     @Override
-    @CachePut(key = "#result.id")
+    @CachePut
     public Categoria save(CategoriaDto categoriaDto) {
         if (!validator.isNameUnique(categoriaDto.getNombre())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre de la categoria no es válido.");
@@ -62,7 +62,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     }
 
     @Override
-    @CachePut(key = "#result.id")
+    @CachePut
     public Categoria update(UUID id, CategoriaDto categoriaDto) {
         System.out.println("Buscando id: " + id);
         var res = repository.findById(id).orElseThrow(
@@ -72,7 +72,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     }
 
     @Override
-    @CachePut(key = "#result.id")
+    @CachePut
     public Categoria delete(UUID id, CategoriaDto categoriaDto) {
         System.out.println("Buscando id: " + id);
         var res = repository.findByIdAndActivadoTrue(id).orElseThrow(

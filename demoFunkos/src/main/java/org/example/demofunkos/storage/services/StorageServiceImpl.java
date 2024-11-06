@@ -100,7 +100,7 @@ public class StorageServiceImpl implements StorageService {
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new StorageNotFound("No se puede leer ficheroooo: " + filename);
+                throw new StorageNotFound("No se puede leer fichero: " + filename);
             }
         } catch (MalformedURLException e) {
             throw new StorageException("Error al cargar fichero " + filename + " " + e);

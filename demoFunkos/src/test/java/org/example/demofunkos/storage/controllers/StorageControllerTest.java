@@ -19,13 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -51,30 +47,19 @@ class StorageControllerTest {
     private Resource resource;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        Path sourcePath = Paths.get("test_imgs", "test-image20.png");
-        if (Files.notExists(sourcePath)) {
-            Files.createDirectories(sourcePath.getParent());
-            Files.createFile(sourcePath);
-        }
-
-        Path destination = Paths.get("imgs/test-image20.png");
-        Files.createDirectories(destination.getParent());
-
-        Files.copy(sourcePath, destination, StandardCopyOption.REPLACE_EXISTING);
     }
-
 
     @Test
     void serveFile() throws Exception {
-        String filename = "test-image20.png";
+        String filename = "test-image3.png";
 
-        Resource resource = mock(Resource.class);
-        File testFile = Files.createFile(Path.of("test_imgs/test-image20.png")).toFile();
-        when(storageService.loadAsResource(filename)).thenReturn(resource);
-        when(resource.getInputStream()).thenReturn(new FileInputStream(testFile));
+        Resource mockResource = mock(Resource.class);
+        InputStream mockInputStream = new ByteArrayInputStream("mock content".getBytes());
+        when(mockResource.getInputStream()).thenReturn(mockInputStream);
+
+        when(storageService.loadAsResource(filename)).thenReturn(mockResource);
 
         MockHttpServletResponse response = mvc.perform(
                         get(endpoint + "/" + filename)
@@ -91,10 +76,10 @@ class StorageControllerTest {
 
     @Test
     void serveFileThrowsException() throws Exception {
-        String filename = "test-image20.kei";
+        String filename = "test-image3.kei";
 
         when(storageService.loadAsResource(filename)).thenReturn(resource);
-        when(resource.getFile()).thenThrow(new IOException());
+        when(resource.getInputStream()).thenThrow(new IOException("Unable to determine file type"));
 
         MockHttpServletResponse response = mvc.perform(
                         get(endpoint + "/" + filename)
