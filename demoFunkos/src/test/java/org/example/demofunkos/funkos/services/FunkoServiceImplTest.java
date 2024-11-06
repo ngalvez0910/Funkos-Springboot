@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +81,20 @@ class FunkoServiceImplTest {
             () -> assertEquals(10.99, result.getPrecio()),
             () -> assertEquals(categoriaTest, result.getCategoria())
         );
+
+        verify(repository, times(1)).findById(1L);
+    }
+
+    @Test
+    void getByIdNotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        ResponseStatusException thrown = assertThrows(
+                ResponseStatusException.class, () -> service.getById(1L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, thrown.getStatusCode());
+        assertEquals("El Funko con id 1 no se ha encontrado.", thrown.getReason());
 
         verify(repository, times(1)).findById(1L);
     }
@@ -156,6 +172,36 @@ class FunkoServiceImplTest {
     }
 
     @Test
+    void updateNotFound() {
+        Categoria updatedCategoria = new Categoria();
+        updatedCategoria.setId(UUID.fromString("4182d617-ec89-4fbc-be95-85e461778766"));
+        updatedCategoria.setNombre("CategoriaTest");
+        updatedCategoria.setActivado(true);
+
+        FunkoDto updatedFunkoDto = new FunkoDto();
+        updatedFunkoDto.setNombre("FunkoTest");
+        updatedFunkoDto.setPrecio(10.00);
+        updatedFunkoDto.setCategoria(updatedCategoria.getNombre());
+
+        Funko updatedFunko = new Funko();
+        updatedFunko.setId(2L);
+        updatedFunko.setNombre("FunkoTest");
+        updatedFunko.setPrecio(10.00);
+        updatedFunko.setCategoria(updatedCategoria);
+
+        when(repository.findById(2L)).thenReturn(Optional.empty());
+
+        ResponseStatusException thrown = assertThrows(
+                ResponseStatusException.class, () -> service.update(2L, updatedFunkoDto)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, thrown.getStatusCode());
+        assertEquals("El Funko con id 2 no se ha encontrado.", thrown.getReason());
+
+        verify(repository, times(1)).findById(2L);
+    }
+
+    @Test
     void delete() {
         when(repository.findById(1L)).thenReturn(Optional.of(funkoTest));
 
@@ -169,5 +215,19 @@ class FunkoServiceImplTest {
 
         verify(repository, times(1)).findById(1L);
         verify(repository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void deleteNotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        ResponseStatusException thrown = assertThrows(
+                ResponseStatusException.class, () -> service.delete(1L)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, thrown.getStatusCode());
+        assertEquals("El Funko con id 1 no se ha encontrado.", thrown.getReason());
+
+        verify(repository, times(1)).findById(1L);
     }
 }
