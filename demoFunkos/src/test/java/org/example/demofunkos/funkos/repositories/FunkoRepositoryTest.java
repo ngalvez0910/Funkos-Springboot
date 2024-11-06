@@ -22,17 +22,19 @@ class FunkoRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
 
-    private static final Categoria categoriaTest = new Categoria(UUID.randomUUID(), "PELICULA", LocalDateTime.now(), LocalDateTime.now(), true);
-    private static final Funko funkoTest = new Funko(1L, "Darth Vader", 10.99, categoriaTest, LocalDateTime.now(), LocalDateTime.now());
+    private static Categoria categoriaTest = new Categoria(UUID.randomUUID(), "PELICULA", LocalDateTime.now(), LocalDateTime.now(), true);
+    private static Funko funkoTest = new Funko(1L, "Darth Vader", 10.99, categoriaTest, LocalDateTime.now(), LocalDateTime.now());
 
     @BeforeEach
     void setUp() {
-        entityManager.merge(categoriaTest);
+        categoriaTest = entityManager.merge(categoriaTest);
         entityManager.flush();
         funkoTest.setCategoria(categoriaTest);
-        entityManager.merge(funkoTest);
+        funkoTest = entityManager.merge(funkoTest);
         entityManager.flush();
     }
+
+
 
     @Test
     void findAll() {
