@@ -49,4 +49,22 @@ class CategoriaValidatorTest {
 
         verify(repository, times(1)).findByNombre(nombre);
     }
+
+    @Test
+    void isIdValid() {
+        String idValida = "4182d617-ec89-4fbc-be95-85e461778766";
+
+        boolean result = categoriaValidator.isIdValid(idValida);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void isIdInvalid() {
+        String idInvalida = "4182d617-ec89-4f";
+
+        boolean result = categoriaValidator.isIdValid(idInvalida);
+
+        assertFalse(result);
+    }
 }

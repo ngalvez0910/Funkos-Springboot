@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -191,5 +193,90 @@ class FunkoControllerTest {
         assertEquals(response.getStatus(), HttpStatus.OK.value());
 
         verify(service, times(1)).delete(String.valueOf(1L));
+    }
+
+    @Test
+    void nombreIsBlank() throws Exception {
+        FunkoDto funkoDto = new FunkoDto();
+        funkoDto.setNombre("");
+        funkoDto.setPrecio(10.00);
+        funkoDto.setCategoria("CategoriaTest");
+
+        mvc.perform(post(myEndpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(funkoDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.nombre").value("El nombre no puede estar vacio"))
+                .andReturn();
+    }
+
+    @Test
+    void precioMenorCero() throws Exception {
+        FunkoDto funkoDto = new FunkoDto();
+        funkoDto.setNombre("FunkoTest");
+        funkoDto.setPrecio(-1.00);
+        funkoDto.setCategoria("CategoriaTest");
+
+        mvc.perform(post(myEndpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(funkoDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.precio").value("debe ser mayor que o igual a 0"))
+                .andReturn();
+    }
+
+    @Test
+    void precioMayorCincuenta() throws Exception {
+        FunkoDto funkoDto = new FunkoDto();
+        funkoDto.setNombre("FunkoTest");
+        funkoDto.setPrecio(51.00);
+        funkoDto.setCategoria("CategoriaTest");
+
+        mvc.perform(post(myEndpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(funkoDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.precio").value("debe ser menor que o igual a 50"))
+                .andReturn();
+    }
+
+    @Test
+    void precioNull() throws Exception {
+        FunkoDto funkoDtoConPrecioNulo = new FunkoDto();
+        funkoDtoConPrecioNulo.setNombre("FunkoTest");
+        funkoDtoConPrecioNulo.setPrecio(null);
+        funkoDtoConPrecioNulo.setCategoria("CategoriaTest");
+
+        mvc.perform(post(myEndpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(funkoDtoConPrecioNulo)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.precio").value("El precio no puede ser un campo nulo"))
+                .andReturn();
+    }
+
+    @Test
+    void categoriaBlank() throws Exception {
+        FunkoDto funkoDto = new FunkoDto();
+        funkoDto.setNombre("FunkoTest");
+        funkoDto.setPrecio(10.00);
+        funkoDto.setCategoria("");
+
+        mvc.perform(post(myEndpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(funkoDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.categoria").value("La categoria no puede estar vacia"))
+                .andReturn();
+    }
+
+    @Test
+    void testValidationExceptionHandler() throws Exception {
+        mvc.perform(post(myEndpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"nombre\": \"\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.nombre").value("El nombre no puede estar vacio"))
+                .andReturn();
     }
 }

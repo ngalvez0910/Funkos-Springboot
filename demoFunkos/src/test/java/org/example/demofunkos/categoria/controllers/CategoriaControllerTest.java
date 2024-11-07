@@ -26,6 +26,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -185,5 +187,34 @@ class CategoriaControllerTest {
         );
 
         verify(service, times(1)).update(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), deletedCategoria);
+    }
+
+    @Test
+    void nombreIsBlank() throws Exception {
+        CategoriaDto nuevoCategoria = new CategoriaDto();
+        nuevoCategoria.setNombre("");
+        nuevoCategoria.setActivado(true);
+
+        MockHttpServletResponse response = mvc.perform(
+                        post(myEndpoint)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(nuevoCategoria)))
+                .andReturn().getResponse();
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+
+        String responseContent = response.getContentAsString();
+
+        assertTrue(responseContent.contains("El nombre no puede estar vacio"));
+    }
+
+    @Test
+    void testValidationExceptionHandler() throws Exception {
+        mvc.perform(post(myEndpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"nombre\": \"\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.nombre").value("El nombre no puede estar vacio"))
+                .andReturn();
     }
 }
