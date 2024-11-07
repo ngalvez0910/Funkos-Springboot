@@ -8,13 +8,13 @@ import java.time.LocalDateTime;
 
 @Component
 public class CategoriaMapper {
-    public Categoria fromDto(CategoriaDto categoriaDto) {
+    public Categoria toCategoria(CategoriaDto categoriaDto) {
         var categoria = new Categoria();
         categoria.setNombre(categoriaDto.getNombre());
         return categoria;
     }
 
-    public Categoria toCategoria(CategoriaDto categoriaDto, Categoria categoria){
+    public Categoria toCategoriaUpdate(CategoriaDto categoriaDto, Categoria categoria){
         return new Categoria(
                 categoria.getId(),
                 categoriaDto.getNombre() != null ? categoriaDto.getNombre() : categoria.getNombre(),

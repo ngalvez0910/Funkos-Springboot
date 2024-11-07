@@ -84,7 +84,7 @@ class CategoriaControllerTest {
 
     @Test
     void getById() throws Exception {
-        when(service.getById(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"))).thenReturn(categoriaTest);
+        when(service.getById("12d45756-3895-49b2-90d3-c4a12d5ee081")).thenReturn(categoriaTest);
 
         MockHttpServletResponse response = mvc.perform(
                         get(myEndpoint + "/12d45756-3895-49b2-90d3-c4a12d5ee081")
@@ -100,7 +100,7 @@ class CategoriaControllerTest {
                 () -> assertEquals(res.getActivado(), categoriaTest.getActivado())
         );
 
-        verify(service, times(1)).getById(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"));
+        verify(service, times(1)).getById("12d45756-3895-49b2-90d3-c4a12d5ee081");
     }
 
     @Test
@@ -109,7 +109,7 @@ class CategoriaControllerTest {
         nuevoCategoria.setNombre("DISNEY");
         nuevoCategoria.setActivado(true);
 
-        when(service.save(nuevoCategoria)).thenReturn(mapper.fromDto(nuevoCategoria));
+        when(service.save(nuevoCategoria)).thenReturn(mapper.toCategoria(nuevoCategoria));
 
         MockHttpServletResponse response = mvc.perform(
                         post(myEndpoint)
@@ -121,8 +121,8 @@ class CategoriaControllerTest {
 
         assertAll(
                 () -> assertEquals(response.getStatus(), HttpStatus.CREATED.value()),
-                () -> assertEquals(res.getId(), mapper.fromDto(nuevoCategoria).getId()),
-                () -> assertEquals(res.getNombre(), mapper.fromDto(nuevoCategoria).getNombre()),
+                () -> assertEquals(res.getId(), mapper.toCategoria(nuevoCategoria).getId()),
+                () -> assertEquals(res.getNombre(), mapper.toCategoria(nuevoCategoria).getNombre()),
                 () -> assertEquals(res.getActivado(), nuevoCategoria.getActivado())
         );
 
@@ -140,7 +140,7 @@ class CategoriaControllerTest {
         expectedCategoria.setNombre("SUPERHEROES");
         expectedCategoria.setActivado(true);
 
-        when(service.update(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), updatedCategoria)).thenReturn(expectedCategoria);
+        when(service.update("12d45756-3895-49b2-90d3-c4a12d5ee081", updatedCategoria)).thenReturn(expectedCategoria);
 
         MockHttpServletResponse response = mvc.perform(
                         patch(myEndpoint + "/12d45756-3895-49b2-90d3-c4a12d5ee081")
@@ -157,7 +157,7 @@ class CategoriaControllerTest {
                 () -> assertEquals(res.getActivado(), expectedCategoria.getActivado())
         );
 
-        verify(service, times(1)).update(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), updatedCategoria);
+        verify(service, times(1)).update("12d45756-3895-49b2-90d3-c4a12d5ee081", updatedCategoria);
     }
 
 
@@ -167,7 +167,7 @@ class CategoriaControllerTest {
         deletedCategoria.setNombre("SUPERHEROES");
         deletedCategoria.setActivado(true);
 
-        when(service.update(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), deletedCategoria)).thenReturn(mapper.fromDto(deletedCategoria));
+        when(service.update("12d45756-3895-49b2-90d3-c4a12d5ee081", deletedCategoria)).thenReturn(mapper.toCategoria(deletedCategoria));
 
         MockHttpServletResponse response = mvc.perform(
                         patch(myEndpoint + "/12d45756-3895-49b2-90d3-c4a12d5ee081")
@@ -181,12 +181,12 @@ class CategoriaControllerTest {
 
         assertAll(
                 () -> assertEquals(response.getStatus(), HttpStatus.OK.value()),
-                () -> assertEquals(res.getId(), mapper.fromDto(deletedCategoria).getId()),
-                () -> assertEquals(res.getNombre(), mapper.fromDto(deletedCategoria).getNombre()),
+                () -> assertEquals(res.getId(), mapper.toCategoria(deletedCategoria).getId()),
+                () -> assertEquals(res.getNombre(), mapper.toCategoria(deletedCategoria).getNombre()),
                 () -> assertEquals(res.getActivado(), deletedCategoria.getActivado())
         );
 
-        verify(service, times(1)).update(UUID.fromString("12d45756-3895-49b2-90d3-c4a12d5ee081"), deletedCategoria);
+        verify(service, times(1)).update("12d45756-3895-49b2-90d3-c4a12d5ee081", deletedCategoria);
     }
 
     @Test
